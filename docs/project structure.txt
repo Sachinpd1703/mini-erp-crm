@@ -1,0 +1,169 @@
+mini-erp-crm/
+│
+├── backend/
+│   ├── src/
+│   │   │
+│   │   ├── config/
+│   │   │   ├── database.ts
+│   │   │   ├── env.ts
+│   │   │   └── logger.ts
+│   │   │
+│   │   ├── middlewares/
+│   │   │   ├── auth.middleware.ts
+│   │   │   ├── role.middleware.ts
+│   │   │   ├── error.middleware.ts
+│   │   │   └── validation.middleware.ts
+│   │   │
+│   │   ├── common/
+│   │   │   ├── errors/
+│   │   │   ├── utils/
+│   │   │   ├── constants/
+│   │   │   └── types/
+│   │   │
+│   │   ├── modules/
+│   │   │   │
+│   │   │   ├── auth/
+│   │   │   │   ├── auth.controller.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── auth.routes.ts
+│   │   │   │   ├── auth.validation.ts
+│   │   │   │   ├── auth.types.ts
+│   │   │   │   └── auth.repository.ts
+│   │   │   │
+│   │   │   ├── users/
+│   │   │   │   ├── user.controller.ts
+│   │   │   │   ├── user.service.ts
+│   │   │   │   ├── user.routes.ts
+│   │   │   │   ├── user.validation.ts
+│   │   │   │   ├── user.types.ts
+│   │   │   │   └── user.repository.ts
+│   │   │   │
+│   │   │   ├── customers/
+│   │   │   │   ├── customer.controller.ts
+│   │   │   │   ├── customer.service.ts
+│   │   │   │   ├── customer.routes.ts
+│   │   │   │   ├── customer.validation.ts
+│   │   │   │   ├── customer.types.ts
+│   │   │   │   └── customer.repository.ts
+│   │   │   │
+│   │   │   ├── products/
+│   │   │   │   ├── product.controller.ts
+│   │   │   │   ├── product.service.ts
+│   │   │   │   ├── product.routes.ts
+│   │   │   │   ├── product.validation.ts
+│   │   │   │   ├── product.types.ts
+│   │   │   │   └── product.repository.ts
+│   │   │   │
+│   │   │   ├── inventory/
+│   │   │   │   ├── inventory.controller.ts
+│   │   │   │   ├── inventory.service.ts
+│   │   │   │   ├── inventory.routes.ts
+│   │   │   │   ├── inventory.types.ts
+│   │   │   │   └── inventory.repository.ts
+│   │   │   │
+│   │   │   └── challans/
+│   │   │       ├── challan.controller.ts
+│   │   │       ├── challan.service.ts
+│   │   │       ├── challan.routes.ts
+│   │   │       ├── challan.validation.ts
+│   │   │       ├── challan.types.ts
+│   │   │       └── challan.repository.ts
+│   │   │
+│   │   ├── app.ts
+│   │   └── server.ts
+│   │
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   │
+│   ├── tests/
+│   │   ├── auth/
+│   │   ├── customers/
+│   │   ├── products/
+│   │   ├── inventory/
+│   │   └── challans/
+│   │
+│   ├── .env
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
+│
+│
+├── frontend/
+│   ├── src/
+│   │   │
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   ├── layout/
+│   │   │   └── common/
+│   │   │
+│   │   ├── modules/
+│   │   │   │
+│   │   │   ├── auth/
+│   │   │   │   ├── pages/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   ├── services/
+│   │   │   │   └── types.ts
+│   │   │   │
+│   │   │   ├── customers/
+│   │   │   │   ├── pages/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   ├── services/
+│   │   │   │   └── types.ts
+│   │   │   │
+│   │   │   ├── products/
+│   │   │   │   ├── pages/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   ├── services/
+│   │   │   │   └── types.ts
+│   │   │   │
+│   │   │   ├── inventory/
+│   │   │   │   ├── pages/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   ├── services/
+│   │   │   │   └── types.ts
+│   │   │   │
+│   │   │   └── challans/
+│   │   │       ├── pages/
+│   │   │       ├── components/
+│   │   │       ├── hooks/
+│   │   │       ├── services/
+│   │   │       └── types.ts
+│   │   │
+│   │   ├── layouts/
+│   │   │   ├── DashboardLayout.tsx
+│   │   │   └── AuthLayout.tsx
+│   │   │
+│   │   ├── routes/
+│   │   │   └── AppRoutes.tsx
+│   │   │
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   │
+│   │   ├── store/
+│   │   ├── types/
+│   │   ├── utils/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   │
+│   ├── public/
+│   ├── package.json
+│   └── tsconfig.json
+│
+│
+├── docs/
+│   ├── architecture.md
+│   ├── api.md
+│   ├── database.md
+│   └── business-rules.md
+│
+├── postman/
+│   └── mini-erp-crm.postman_collection.json
+│
+├── .gitignore
+├── README.md
+└── docker-compose.yml
