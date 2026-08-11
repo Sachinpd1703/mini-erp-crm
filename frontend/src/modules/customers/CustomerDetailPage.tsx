@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Customer, SalesChallan } from '../../types';
 import { apiClient } from '../../services/api';
-import { clientCache } from '../../services/apiCache';
+import { clientCache, getCachedData } from '../../services/apiCache';
 import { Badge } from '../../components/ui/Badge';
 import { CardSkeleton, TableSkeleton } from '../../components/ui/Skeleton';
 import { EditCustomerModal } from './components/EditCustomerModal';
@@ -15,7 +15,6 @@ import {
   Calendar,
   FileText,
   DollarSign,
-  Plus,
   Edit3,
   Download,
   MessageSquare,
@@ -23,6 +22,7 @@ import {
   CreditCard,
   Receipt,
   UserCheck,
+  MapPin,
 } from 'lucide-react';
 
 export const CustomerDetailPage: React.FC = () => {
@@ -52,9 +52,18 @@ export const CustomerDetailPage: React.FC = () => {
 
   const fetchCustomerDetail = async () => {
     if (!id) return;
+    const cacheKey = `/customers/${id}`;
+
+    const cached = clientCache.get<any>(cacheKey);
+    if (cached) {
+      setCustomer(cached.data || null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await apiClient.get(`/customers/${id}`);
+      const res = await getCachedData(cacheKey);
       if (res.data.success) {
         setCustomer(res.data.data);
       }
@@ -80,6 +89,8 @@ export const CustomerDetailPage: React.FC = () => {
       });
       if (res.data.success) {
         setNewNote('');
+        clientCache.invalidate(`/customers/${customer.id}`);
+        clientCache.invalidate('/customers');
         fetchCustomerDetail();
       }
     } catch (err) {
@@ -116,6 +127,7 @@ export const CustomerDetailPage: React.FC = () => {
       const res = await apiClient.put(`/customers/${customer.id}`, editFormData);
       if (res.data.success) {
         setEditingCustomer(null);
+        clientCache.invalidate(`/customers/${customer.id}`);
         clientCache.invalidate('/customers');
         fetchCustomerDetail();
       }
@@ -150,9 +162,10 @@ export const CustomerDetailPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-xl bg-slate-800 animate-pulse" />
-          <div className="w-48 h-6 rounded bg-slate-800 animate-pulse" />
+          <div className="w-8 h-8 rounded-xl bg-[#FFE4C4] dark:bg-slate-800 animate-pulse" />
+          <div className="w-48 h-6 rounded bg-[#FFE4C4] dark:bg-slate-800 animate-pulse" />
         </div>
+        <div className="w-full h-32 rounded-2xl bg-[#FFE4C4] dark:bg-slate-800 animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <CardSkeleton />
           <CardSkeleton />
@@ -167,10 +180,10 @@ export const CustomerDetailPage: React.FC = () => {
   if (!customer) {
     return (
       <div className="p-12 text-center space-y-4">
-        <p className="text-base text-slate-400">Customer profile not found.</p>
+        <p className="text-base text-[#6B5542] dark:text-slate-400 font-medium">Customer profile not found.</p>
         <Link
           to="/customers"
-          className="inline-flex items-center space-x-2 px-4 py-2 bg-[#004D34] text-white rounded-xl text-xs font-bold"
+          className="inline-flex items-center space-x-2 px-4 py-2 bg-[#004D34] text-white rounded-xl text-xs font-bold shadow-md"
         >
           <ArrowLeft size={16} />
           <span>Back to Customers</span>
@@ -244,7 +257,58 @@ export const CustomerDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* Financial Metrics Cards */}
+      {/* TOP SECTION: Business Contact Profile Card */}
+      <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between border-b border-[#F3CEA6] dark:border-slate-800 pb-3">
+          <h3 className="text-sm font-bold text-[#002A1C] dark:text-white flex items-center space-x-2">
+            <Building className="w-4 h-4 text-[#004D34] dark:text-sky-400" />
+            <span>Business Contact Profile & Master Details</span>
+          </h3>
+          <span className="text-xs font-mono font-bold text-[#004D34] dark:text-sky-400">
+            GSTIN: {customer.gstNumber || 'N/A'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div className="p-3 bg-[#FFFBF7] dark:bg-slate-800/60 rounded-xl border border-[#F3CEA6]/80 dark:border-slate-700 space-y-1">
+            <span className="text-[#6B5542] dark:text-slate-400 font-medium flex items-center space-x-1.5">
+              <Building className="w-3.5 h-3.5 text-[#004D34] dark:text-sky-400" />
+              <span>Business / Trade Name</span>
+            </span>
+            <p className="font-bold text-[#002A1C] dark:text-white text-sm">{customer.businessName}</p>
+          </div>
+
+          <div className="p-3 bg-[#FFFBF7] dark:bg-slate-800/60 rounded-xl border border-[#F3CEA6]/80 dark:border-slate-700 space-y-1">
+            <span className="text-[#6B5542] dark:text-slate-400 font-medium flex items-center space-x-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-[#004D34] dark:text-sky-400" />
+              <span>Contact Person</span>
+            </span>
+            <p className="font-bold text-[#002A1C] dark:text-slate-200">{customer.name}</p>
+          </div>
+
+          <div className="p-3 bg-[#FFFBF7] dark:bg-slate-800/60 rounded-xl border border-[#F3CEA6]/80 dark:border-slate-700 space-y-1">
+            <span className="text-[#6B5542] dark:text-slate-400 font-medium flex items-center space-x-1.5">
+              <Mail className="w-3.5 h-3.5 text-[#004D34] dark:text-sky-400" />
+              <span>Email & Phone</span>
+            </span>
+            <p className="font-bold text-[#002A1C] dark:text-slate-200">{customer.email}</p>
+            <p className="text-[#6B5542] dark:text-slate-400 font-medium">{customer.mobile}</p>
+          </div>
+
+          <div className="p-3 bg-[#FFFBF7] dark:bg-slate-800/60 rounded-xl border border-[#F3CEA6]/80 dark:border-slate-700 space-y-1">
+            <span className="text-[#6B5542] dark:text-slate-400 font-medium flex items-center space-x-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#004D34] dark:text-sky-400" />
+              <span>Address & Follow-up</span>
+            </span>
+            <p className="font-medium text-[#002A1C] dark:text-slate-200 line-clamp-1">{customer.address}</p>
+            <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">
+              Next: {customer.followUpDate ? new Date(customer.followUpDate).toLocaleDateString() : 'Not scheduled'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* SECOND SECTION: Financial Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm">
           <div className="flex items-center justify-between text-[#6B5542] dark:text-slate-400">
@@ -306,9 +370,8 @@ export const CustomerDetailPage: React.FC = () => {
 
       {/* Main Grid Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Columns: Financial Ledger & Challans */}
+        {/* Left 2 Columns: Financial Ledger */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Section 1: Customer Financial Ledger */}
           <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#F3CEA6] dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-[#002A1C] dark:text-white flex items-center space-x-2">
@@ -381,56 +444,8 @@ export const CustomerDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right 1 Column: Contact Profile Card & CRM Notes */}
+        {/* Right 1 Column: CRM Notes Timeline */}
         <div className="space-y-6">
-          {/* Contact Details Card */}
-          <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
-            <h3 className="text-sm font-bold text-[#002A1C] dark:text-white flex items-center space-x-2 border-b border-[#F3CEA6] dark:border-slate-800 pb-3">
-              <Building className="w-4 h-4 text-[#004D34] dark:text-sky-400" />
-              <span>Business Contact Profile</span>
-            </h3>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <span className="text-[#6B5542] dark:text-slate-400 font-medium">Business / Trade Name:</span>
-                <p className="font-bold text-[#002A1C] dark:text-white text-sm">{customer.businessName}</p>
-              </div>
-
-              <div>
-                <span className="text-[#6B5542] dark:text-slate-400 font-medium">Contact Person:</span>
-                <p className="font-bold text-[#002A1C] dark:text-slate-200">{customer.name}</p>
-              </div>
-
-              <div className="flex items-center space-x-2 text-[#002A1C] dark:text-slate-200">
-                <Mail className="w-3.5 h-3.5 text-[#004D34] dark:text-slate-400 flex-shrink-0" />
-                <span className="font-medium">{customer.email}</span>
-              </div>
-
-              <div className="flex items-center space-x-2 text-[#002A1C] dark:text-slate-200">
-                <Phone className="w-3.5 h-3.5 text-[#004D34] dark:text-slate-400 flex-shrink-0" />
-                <span className="font-medium">{customer.mobile}</span>
-              </div>
-
-              <div>
-                <span className="text-[#6B5542] dark:text-slate-400 font-medium">GST Identification Number:</span>
-                <p className="font-mono font-bold text-[#002A1C] dark:text-slate-200">{customer.gstNumber || 'N/A'}</p>
-              </div>
-
-              <div>
-                <span className="text-[#6B5542] dark:text-slate-400 font-medium">Registered Address:</span>
-                <p className="font-medium text-[#002A1C] dark:text-slate-200">{customer.address}</p>
-              </div>
-
-              <div>
-                <span className="text-[#6B5542] dark:text-slate-400 font-medium">Next Follow-Up Date:</span>
-                <p className="font-medium text-[#002A1C] dark:text-slate-200">
-                  {customer.followUpDate ? new Date(customer.followUpDate).toLocaleDateString() : 'Not scheduled'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* CRM Interaction Notes Timeline */}
           <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
             <h3 className="text-sm font-bold text-[#002A1C] dark:text-white flex items-center space-x-2 border-b border-[#F3CEA6] dark:border-slate-800 pb-3">
               <MessageSquare className="w-4 h-4 text-[#004D34] dark:text-sky-400" />
