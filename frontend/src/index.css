@@ -2,8 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Light Theme Palette (Requested Custom Specs) */
+  --bg-app: #FFFBF7;
+  --bg-sidebar: #002A1C;
+  --bg-card: #FFE4C4;
+  --bg-card-hover: #FDD8A8;
+  --border-color: #F3CEA6;
+  --text-main: #002A1C;
+  --text-muted: #6B5542;
+  --text-sidebar: #E2F5EE;
+  --text-sidebar-muted: #8CBCAE;
+  --accent-primary: #004D34;
+  --accent-primary-hover: #003826;
+  --input-bg: #FFFFFF;
+}
+
+.dark {
+  /* Dark Theme Palette (Deep Midnight Operations Mode) */
+  --bg-app: #0B0F17;
+  --bg-sidebar: #021811;
+  --bg-card: #111827;
+  --bg-card-hover: #1F2937;
+  --border-color: #1F2937;
+  --text-main: #F9FAFB;
+  --text-muted: #9CA3AF;
+  --text-sidebar: #ECFDF5;
+  --text-sidebar-muted: #6EE7B7;
+  --accent-primary: #0284C7;
+  --accent-primary-hover: #0369A1;
+  --input-bg: #1F2937;
+}
+
 @layer base {
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }

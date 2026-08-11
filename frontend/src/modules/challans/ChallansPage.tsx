@@ -163,14 +163,14 @@ export const ChallansPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Sales Challans & Order Fulfillment</h2>
-          <p className="text-xs text-slate-400">Generate sales orders, trigger atomic stock deductions, and download invoices</p>
+          <h2 className="text-xl font-bold text-[#002A1C] dark:text-white tracking-tight">Sales Challans & Order Fulfillment</h2>
+          <p className="text-xs text-[#6B5542] dark:text-slate-400">Generate sales orders, trigger atomic stock deductions, and download invoices</p>
         </div>
 
         {canCreate && (
           <button
             onClick={openCreateWizard}
-            className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-sky-600/20 transition flex items-center space-x-2 self-start sm:self-auto"
+            className="px-4 py-2.5 bg-[#004D34] hover:bg-[#003826] dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-md transition flex items-center space-x-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Create Sales Challan</span>
@@ -183,7 +183,7 @@ export const ChallansPage: React.FC = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-sky-500"
+          className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-[#002A1C] dark:text-slate-300 font-medium focus:outline-none focus:border-[#004D34] dark:focus:border-sky-500"
         >
           <option value="">All Statuses</option>
           <option value="DRAFT">DRAFT</option>
@@ -191,14 +191,14 @@ export const ChallansPage: React.FC = () => {
           <option value="CANCELLED">CANCELLED</option>
         </select>
 
-        <span className="text-xs text-slate-400">{challans.length} Orders</span>
+        <span className="text-xs text-[#6B5542] dark:text-slate-400 font-medium">{challans.length} Orders</span>
       </div>
 
       {/* Challans Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-800/50 text-slate-400 border-b border-slate-800 text-[11px] uppercase tracking-wider">
+            <thead className="bg-[#FDD8A8] dark:bg-slate-800/50 text-[#002A1C] dark:text-slate-400 border-b border-[#F3CEA6] dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3 px-4">Challan #</th>
                 <th className="py-3 px-4">Customer</th>
@@ -208,38 +208,38 @@ export const ChallansPage: React.FC = () => {
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50">
+            <tbody className="divide-y divide-[#F3CEA6]/50 dark:divide-slate-800/50">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
                     Loading sales challans...
                   </td>
                 </tr>
               ) : challans.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
                     No sales challans match current criteria.
                   </td>
                 </tr>
               ) : (
                 challans.map((ch) => (
-                  <tr key={ch.id} className="hover:bg-slate-800/30 transition">
-                    <td className="py-3.5 px-4 font-mono font-semibold text-sky-400">
+                  <tr key={ch.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#004D34] dark:text-sky-400">
                       {ch.challanNumber}
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-[#6B5542] dark:text-slate-500 font-sans font-medium">
                         {new Date(ch.createdAt).toLocaleDateString()}
                       </p>
                     </td>
                     <td className="py-3.5 px-4">
-                      <p className="font-semibold text-white">
+                      <p className="font-bold text-[#002A1C] dark:text-white">
                         {ch.customer?.businessName || ch.customer?.name}
                       </p>
-                      <p className="text-[11px] text-slate-400">Attn: {ch.customer?.name}</p>
+                      <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">Attn: {ch.customer?.name}</p>
                     </td>
-                    <td className="py-3.5 px-4 text-right text-slate-300">
-                      <span className="font-semibold text-white">{ch.totalQuantity} Units</span>
+                    <td className="py-3.5 px-4 text-right text-[#002A1C] dark:text-slate-300">
+                      <span className="font-bold text-[#002A1C] dark:text-white">{ch.totalQuantity} Units</span>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-white">
+                    <td className="py-3.5 px-4 text-right font-bold text-[#002A1C] dark:text-white">
                       INR {Number(ch.totalAmount).toFixed(2)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
@@ -260,7 +260,7 @@ export const ChallansPage: React.FC = () => {
                           <button
                             onClick={() => handleStatusChange(ch.id, 'CONFIRMED')}
                             title="Confirm & Deduct Stock"
-                            className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-lg transition text-[11px] font-medium inline-flex items-center space-x-1"
+                            className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-800 dark:text-emerald-400 border border-emerald-500/30 rounded-lg transition text-[11px] font-bold inline-flex items-center space-x-1"
                           >
                             <CheckCircle className="w-3 h-3" />
                             <span>Confirm Order</span>
@@ -269,7 +269,7 @@ export const ChallansPage: React.FC = () => {
                           <button
                             onClick={() => handleStatusChange(ch.id, 'CANCELLED')}
                             title="Cancel Draft"
-                            className="px-2 py-1 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 rounded-lg transition text-[11px]"
+                            className="px-2 py-1 bg-red-600/10 hover:bg-red-600/20 text-red-700 dark:text-red-400 border border-red-500/20 rounded-lg transition text-[11px] font-bold"
                           >
                             Cancel
                           </button>
@@ -278,7 +278,7 @@ export const ChallansPage: React.FC = () => {
 
                       <button
                         onClick={() => handleDownloadPdf(ch.id, ch.challanNumber)}
-                        className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg transition text-[11px] font-medium inline-flex items-center space-x-1 border border-slate-700"
+                        className="px-2.5 py-1 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition text-[11px] inline-flex items-center space-x-1"
                       >
                         <Download className="w-3 h-3" />
                         <span>Invoice PDF</span>

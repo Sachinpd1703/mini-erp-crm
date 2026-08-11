@@ -122,14 +122,14 @@ export const CustomersPage: React.FC = () => {
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Customer CRM</h2>
-          <p className="text-xs text-slate-400">Manage client profiles, lead conversion status, and follow-up logs</p>
+          <h2 className="text-xl font-bold text-[#002A1C] dark:text-white tracking-tight">Customer CRM</h2>
+          <p className="text-xs text-[#6B5542] dark:text-slate-400">Manage client profiles, lead conversion status, and follow-up logs</p>
         </div>
 
         {canEdit && (
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-sky-600/20 transition flex items-center space-x-2 self-start sm:self-auto"
+            className="px-4 py-2.5 bg-[#004D34] hover:bg-[#003826] dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-md transition flex items-center space-x-2 self-start sm:self-auto"
           >
             <UserPlus className="w-4 h-4" />
             <span>Add New Customer</span>
@@ -140,20 +140,20 @@ export const CustomersPage: React.FC = () => {
       {/* Search & Filter Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+          <Search className="w-4 h-4 text-[#6B5542] dark:text-slate-500 absolute left-3 top-3" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, company, email..."
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-[#002A1C] dark:text-white placeholder-[#6B5542]/70 dark:placeholder-slate-500 focus:outline-none focus:border-[#004D34] dark:focus:border-sky-500 font-medium"
           />
         </div>
 
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-sky-500"
+          className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-[#002A1C] dark:text-slate-300 font-medium focus:outline-none focus:border-[#004D34] dark:focus:border-sky-500"
         >
           <option value="">All Statuses</option>
           <option value="LEAD">LEAD</option>
@@ -164,7 +164,7 @@ export const CustomersPage: React.FC = () => {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-sky-500"
+          className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-[#002A1C] dark:text-slate-300 font-medium focus:outline-none focus:border-[#004D34] dark:focus:border-sky-500"
         >
           <option value="">All Customer Types</option>
           <option value="RETAIL">RETAIL</option>
@@ -174,10 +174,10 @@ export const CustomersPage: React.FC = () => {
       </div>
 
       {/* Customer Data Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-800/50 text-slate-400 border-b border-slate-800 text-[11px] uppercase tracking-wider">
+            <thead className="bg-[#FDD8A8] dark:bg-slate-800/50 text-[#002A1C] dark:text-slate-400 border-b border-[#F3CEA6] dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3 px-4">Business / Name</th>
                 <th className="py-3 px-4">Contact Info</th>
@@ -187,38 +187,38 @@ export const CustomersPage: React.FC = () => {
                 <th className="py-3 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50">
+            <tbody className="divide-y divide-[#F3CEA6]/50 dark:divide-slate-800/50">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
                     Loading customer database...
                   </td>
                 </tr>
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
                     No matching customer records found.
                   </td>
                 </tr>
               ) : (
                 customers.map((cust) => (
-                  <tr key={cust.id} className="hover:bg-slate-800/30 transition">
+                  <tr key={cust.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
                     <td className="py-3.5 px-4">
-                      <p className="font-semibold text-white">{cust.businessName}</p>
-                      <p className="text-[11px] text-slate-400">{cust.name}</p>
+                      <p className="font-bold text-[#002A1C] dark:text-white">{cust.businessName}</p>
+                      <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">{cust.name}</p>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-300">
-                      <div className="flex items-center space-x-1.5 text-[11px]">
-                        <Mail className="w-3 h-3 text-slate-500" />
+                    <td className="py-3.5 px-4 text-[#002A1C] dark:text-slate-300">
+                      <div className="flex items-center space-x-1.5 text-[11px] font-medium">
+                        <Mail className="w-3 h-3 text-[#6B5542] dark:text-slate-500" />
                         <span>{cust.email}</span>
                       </div>
-                      <div className="flex items-center space-x-1.5 text-[11px] text-slate-400">
-                        <Phone className="w-3 h-3 text-slate-500" />
+                      <div className="flex items-center space-x-1.5 text-[11px] text-[#6B5542] dark:text-slate-400">
+                        <Phone className="w-3 h-3 text-[#6B5542] dark:text-slate-500" />
                         <span>{cust.mobile}</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="text-[10px] font-mono uppercase bg-slate-800 px-2 py-1 rounded text-slate-300">
+                      <span className="text-[10px] font-mono font-bold uppercase bg-[#FFFBF7] dark:bg-slate-800 px-2 py-1 rounded border border-[#F3CEA6] dark:border-slate-700 text-[#002A1C] dark:text-slate-300">
                         {cust.customerType}
                       </span>
                     </td>
@@ -234,7 +234,7 @@ export const CustomersPage: React.FC = () => {
                         }
                       />
                     </td>
-                    <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                    <td className="py-3.5 px-4 text-[#6B5542] dark:text-slate-400 text-[11px] font-medium">
                       {cust.followUpDate
                         ? new Date(cust.followUpDate).toLocaleDateString()
                         : 'Not scheduled'}
@@ -242,7 +242,7 @@ export const CustomersPage: React.FC = () => {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => openCustomerDetail(cust.id)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 font-medium rounded-lg transition inline-flex items-center space-x-1"
+                        className="px-3 py-1.5 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition inline-flex items-center space-x-1 text-xs"
                       >
                         <span>View Profile</span>
                         <ChevronRight className="w-3.5 h-3.5" />

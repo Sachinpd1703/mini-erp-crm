@@ -8,6 +8,9 @@ An enterprise-grade, high-performance operational web application engineered for
 
 All architectural and product requirements documents are organized under [`docs/`](./docs):
 
+- [**Executive Submission Package**](./docs/EXECUTIVE_SUBMISSION_PACKAGE.md): Master submission summary, architecture diagram, stack justification, and case study compliance checklist.
+- [**Theme Implementation Plan**](./docs/THEME_IMPLEMENTATION_PLAN.md): Color palette specification (Spruce Cream & Dark Mode) and design system architecture.
+- [**Development Implementation Plan**](./docs/DEVELOPMENT_PLAN.md): Phase-by-phase execution roadmap and Gantt chart.
 - [**Product Requirements Document (PRD) Suite**](./docs/PRD/README.md)
   - [`01-master-prd.md`](./docs/PRD/01-master-prd.md): System architecture, role matrix, and core module overview.
   - [`02-auth-rbac-prd.md`](./docs/PRD/02-auth-rbac-prd.md): Security architecture, JWT token flow, bcrypt hashing, and role guards.
@@ -17,7 +20,6 @@ All architectural and product requirements documents are organized under [`docs/
   - [`06-api-specification-prd.md`](./docs/PRD/06-api-specification-prd.md): Complete RESTful API endpoint routing table and JSON response formats.
   - [`07-frontend-prd.md`](./docs/PRD/07-frontend-prd.md): React dashboard visual standards, router diagram, and component hierarchy tree.
   - [`08-delivery-and-documentation-prd.md`](./docs/PRD/08-delivery-and-documentation-prd.md): Testing matrix and delivery checklist.
-- [**Development Implementation Plan**](./docs/DEVELOPMENT_PLAN.md): Phase-by-phase implementation roadmap and Gantt chart.
 
 ---
 
