@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { StockMovement, Product, MovementType } from '../../../types';
 import { apiClient } from '../../../services/api';
 import { clientCache, getCachedData } from '../../../services/apiCache';
+import { exportInventoryAuditToExcel } from '../../../utils/exportExcel';
 import { useAuth } from '../../auth/AuthContext';
 
 export function useInventory() {
@@ -102,6 +103,10 @@ export function useInventory() {
     return prodName.includes(term) || sku.includes(term) || reason.includes(term) || author.includes(term);
   });
 
+  const handleExportExcel = () => {
+    exportInventoryAuditToExcel(filteredMovements);
+  };
+
   const canManageStock = user?.role === 'ADMIN' || user?.role === 'WAREHOUSE';
 
   return {
@@ -123,5 +128,6 @@ export function useInventory() {
     canManageStock,
     openAdjustModal,
     handleAdjustStock,
+    handleExportExcel,
   };
 }
