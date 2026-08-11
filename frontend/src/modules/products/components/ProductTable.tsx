@@ -1,13 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Product } from '../../../types';
 import { TableSkeleton } from '../../../components/ui/Skeleton';
-import { AlertTriangle, ArrowUpDown } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import { ProductActionsMenu } from './ProductActionsMenu';
 
 interface ProductTableProps {
   products: Product[];
   loading: boolean;
   canManageStock: boolean;
   onOpenStockModal: (product: Product) => void;
+  onEditProduct: (product: Product) => void;
 }
 
 export const ProductTable: React.FC<ProductTableProps> = ({
@@ -15,10 +18,17 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   loading,
   canManageStock,
   onOpenStockModal,
+  onEditProduct,
 }) => {
+  const navigate = useNavigate();
+
   if (loading) {
     return <TableSkeleton rows={5} cols={7} />;
   }
+
+  const handleRowClick = (productId: string) => {
+    navigate(`/products/${productId}`);
+  };
 
   return (
     <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
@@ -32,7 +42,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               <th className="py-3 px-4 text-right">Current Stock</th>
               <th className="py-3 px-4 text-right">Min Alert</th>
               <th className="py-3 px-4">Location</th>
-              {canManageStock && <th className="py-3 px-4 text-right">Stock Action</th>}
+              <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F3CEA6]/50 dark:divide-slate-800/50">
@@ -46,9 +56,15 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               products.map((prod) => {
                 const isLowStock = prod.currentStock <= prod.minStockAlert;
                 return (
-                  <tr key={prod.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
+                  <tr
+                    key={prod.id}
+                    onClick={() => handleRowClick(prod.id)}
+                    className="hover:bg-[#FFFBF7] dark:hover:bg-slate-800/50 transition cursor-pointer group"
+                  >
                     <td className="py-3.5 px-4">
-                      <p className="font-bold text-[#002A1C] dark:text-white">{prod.name}</p>
+                      <p className="font-bold text-[#002A1C] dark:text-white group-hover:text-[#004D34] dark:group-hover:text-sky-400 transition">
+                        {prod.name}
+                      </p>
                       <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-mono font-medium">SKU: {prod.sku}</p>
                     </td>
                     <td className="py-3.5 px-4 text-[#002A1C] dark:text-slate-300 font-semibold">{prod.category}</td>
@@ -69,17 +85,18 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                     <td className="py-3.5 px-4 text-[#6B5542] dark:text-slate-400 font-mono text-[11px] font-medium">
                       {prod.location || 'Aisle Main'}
                     </td>
-                    {canManageStock && (
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => onOpenStockModal(prod)}
-                          className="px-2.5 py-1.5 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition inline-flex items-center space-x-1 text-[11px]"
-                        >
-                          <ArrowUpDown className="w-3 h-3" />
-                          <span>Adjust Stock</span>
-                        </button>
-                      </td>
-                    )}
+                    <td
+                      className="py-3.5 px-4 text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ProductActionsMenu
+                        product={prod}
+                        canManageStock={canManageStock}
+                        onViewProduct={() => handleRowClick(prod.id)}
+                        onAdjustStock={onOpenStockModal}
+                        onEditProduct={onEditProduct}
+                      />
+                    </td>
                   </tr>
                 );
               })

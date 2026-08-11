@@ -4,6 +4,7 @@ import { useProducts } from './hooks/useProducts';
 import { ProductFilterBar } from './components/ProductFilterBar';
 import { ProductTable } from './components/ProductTable';
 import { AddProductModal } from './components/AddProductModal';
+import { EditProductModal } from './components/EditProductModal';
 import { AdjustStockModal } from './components/AdjustStockModal';
 
 export const ProductsPage: React.FC = () => {
@@ -18,13 +19,19 @@ export const ProductsPage: React.FC = () => {
     setIsAddModalOpen,
     stockModalProduct,
     setStockModalProduct,
+    editingProduct,
+    setEditingProduct,
     formData,
     setFormData,
+    editFormData,
+    setEditFormData,
     stockAdjustData,
     setStockAdjustData,
     formError,
     canManageStock,
     handleCreateProduct,
+    openEditModal,
+    handleUpdateProduct,
     handleAdjustStock,
   } = useProducts();
 
@@ -62,6 +69,7 @@ export const ProductsPage: React.FC = () => {
         loading={loading}
         canManageStock={canManageStock}
         onOpenStockModal={setStockModalProduct}
+        onEditProduct={openEditModal}
       />
 
       {/* Add Product Modal */}
@@ -71,6 +79,16 @@ export const ProductsPage: React.FC = () => {
         onSubmit={handleCreateProduct}
         formData={formData}
         setFormData={setFormData}
+        formError={formError}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        product={editingProduct}
+        onClose={() => setEditingProduct(null)}
+        onSubmit={handleUpdateProduct}
+        editFormData={editFormData}
+        setEditFormData={setEditFormData}
         formError={formError}
       />
 

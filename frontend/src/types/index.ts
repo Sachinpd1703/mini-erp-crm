@@ -84,6 +84,7 @@ export interface Product {
   location?: string | null;
   imageUrl?: string | null;
   createdAt: string;
+  stockMovements?: StockMovement[];
 }
 
 export interface StockMovement {

@@ -14,6 +14,7 @@ export function useProducts() {
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [stockModalProduct, setStockModalProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Form States
   const [formData, setFormData] = useState({
@@ -22,6 +23,15 @@ export function useProducts() {
     category: '',
     unitPrice: 0,
     currentStock: 0,
+    minStockAlert: 5,
+    location: '',
+  });
+
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    sku: '',
+    category: '',
+    unitPrice: 0,
     minStockAlert: 5,
     location: '',
   });
@@ -94,6 +104,41 @@ export function useProducts() {
     }
   };
 
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setFormError('');
+    setEditFormData({
+      name: product.name || '',
+      sku: product.sku || '',
+      category: product.category || '',
+      unitPrice: Number(product.unitPrice) || 0,
+      minStockAlert: Number(product.minStockAlert) || 5,
+      location: product.location || '',
+    });
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    setFormError('');
+    try {
+      const res = await apiClient.put(`/products/${editingProduct.id}`, {
+        ...editFormData,
+        unitPrice: Number(editFormData.unitPrice),
+        minStockAlert: Number(editFormData.minStockAlert),
+      });
+
+      if (res.data.success) {
+        setEditingProduct(null);
+        clientCache.invalidate('/products');
+        clientCache.invalidate('/inventory');
+        fetchProducts();
+      }
+    } catch (err: any) {
+      setFormError(err.response?.data?.error?.message || 'Failed to update product');
+    }
+  };
+
   const handleAdjustStock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stockModalProduct) return;
@@ -131,13 +176,19 @@ export function useProducts() {
     setIsAddModalOpen,
     stockModalProduct,
     setStockModalProduct,
+    editingProduct,
+    setEditingProduct,
     formData,
     setFormData,
+    editFormData,
+    setEditFormData,
     stockAdjustData,
     setStockAdjustData,
     formError,
     canManageStock,
     handleCreateProduct,
+    openEditModal,
+    handleUpdateProduct,
     handleAdjustStock,
   };
 }

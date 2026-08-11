@@ -61,9 +61,18 @@ export class ProductService {
       include: {
         stockMovements: {
           orderBy: { createdAt: 'desc' },
-          take: 10,
           include: {
             author: { select: { id: true, fullName: true, role: true } },
+          },
+        },
+        challanItems: {
+          orderBy: { salesChallan: { createdAt: 'desc' } },
+          include: {
+            salesChallan: {
+              include: {
+                customer: { select: { id: true, businessName: true, name: true } },
+              },
+            },
           },
         },
       },
