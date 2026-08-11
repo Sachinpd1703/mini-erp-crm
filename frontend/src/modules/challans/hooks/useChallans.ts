@@ -7,21 +7,21 @@ import { useAuth } from '../../auth/AuthContext';
 
 export function useChallans() {
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const initialCustomerId = searchParams.get('customerId') || '';
+
   const [challans, setChallans] = useState<SalesChallan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Creation Wizard Modal State
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [customersList, setCustomersList] = useState<Customer[]>([]);
-  const [productsList, setProductsList] = useState<Product[]>([]);
+  // Wizard state
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  // Selected Order Form Data
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [orderItems, setOrderItems] = useState<{ productId: string; quantity: number }[]>([
-    { productId: '', quantity: 1 },
-  ]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(initialCustomerId);
+  const [wizardItems, setWizardItems] = useState<{ productId: string; quantity: number }[]>([]);
   const [formError, setFormError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
 
@@ -43,7 +43,7 @@ export function useChallans() {
         setChallans(res.data.data);
       }
     } catch (err) {
-      console.error('Failed to fetch challans:', err);
+      console.error('Failed to fetch sales challans:', err);
     } finally {
       setLoading(false);
     }
@@ -53,110 +53,105 @@ export function useChallans() {
     fetchChallans();
   }, [statusFilter]);
 
-  // Check if customerId query param is present on mount
+  // Open wizard directly if URL contains customerId parameter
   useEffect(() => {
-    const custId = searchParams.get('customerId');
-    if (custId) {
-      setSelectedCustomerId(custId);
-      openCreateWizard();
-      searchParams.delete('customerId');
-      setSearchParams(searchParams);
+    if (initialCustomerId) {
+      openWizard();
     }
-  }, [searchParams]);
+  }, [initialCustomerId]);
 
-  const openCreateWizard = async () => {
-    setIsCreateModalOpen(true);
+  const openWizard = async () => {
+    setIsWizardOpen(true);
     setFormError('');
+    if (wizardItems.length === 0) {
+      setWizardItems([{ productId: '', quantity: 1 }]);
+    }
     try {
       const [custRes, prodRes] = await Promise.all([
         apiClient.get('/customers?limit=100'),
         apiClient.get('/products?limit=100'),
       ]);
-      if (custRes.data.success) setCustomersList(custRes.data.data);
-      if (prodRes.data.success) setProductsList(prodRes.data.data);
+      if (custRes.data.success) setCustomers(custRes.data.data);
+      if (prodRes.data.success) setProducts(prodRes.data.data);
     } catch (err) {
-      console.error('Failed to load customers/products for wizard:', err);
+      console.error('Failed to load customers or products for wizard:', err);
     }
   };
 
-  const addLineItem = () => {
-    setOrderItems([...orderItems, { productId: '', quantity: 1 }]);
+  const handleAddLineItem = () => {
+    setWizardItems([...wizardItems, { productId: '', quantity: 1 }]);
   };
 
-  const removeLineItem = (index: number) => {
-    if (orderItems.length === 1) return;
-    setOrderItems(orderItems.filter((_, i) => i !== index));
+  const handleRemoveLineItem = (index: number) => {
+    setWizardItems(wizardItems.filter((_, i) => i !== index));
   };
 
-  const updateLineItem = (index: number, field: 'productId' | 'quantity', value: any) => {
-    const updated = [...orderItems];
+  const handleUpdateLineItem = (index: number, field: 'productId' | 'quantity', value: any) => {
+    const updated = [...wizardItems];
     updated[index] = { ...updated[index], [field]: value };
-    setOrderItems(updated);
+    setWizardItems(updated);
   };
 
   const calculateGrandTotal = () => {
-    let total = 0;
-    const prodMap = new Map(productsList.map((p) => [p.id, p]));
-    orderItems.forEach((item) => {
-      const p = prodMap.get(item.productId);
-      if (p) {
-        total += Number(p.unitPrice) * item.quantity;
-      }
-    });
-    return total;
+    const prodMap = new Map(products.map((p) => [p.id, p]));
+    return wizardItems.reduce((sum, item) => {
+      const prod = prodMap.get(item.productId);
+      return sum + (prod ? Number(prod.unitPrice) * item.quantity : 0);
+    }, 0);
   };
 
-  const handleCreateOrder = async (requestedStatus: ChallanStatus) => {
+  const handleCreateOrder = async (targetStatus: ChallanStatus) => {
     if (!selectedCustomerId) {
-      setFormError('Please select a customer');
+      setFormError('Please select a customer.');
       return;
     }
 
-    if (orderItems.some((i) => !i.productId || i.quantity < 1)) {
-      setFormError('Please select valid products and quantities for all lines');
+    const validItems = wizardItems.filter((i) => i.productId && i.quantity > 0);
+    if (validItems.length === 0) {
+      setFormError('Please add at least one line item product.');
       return;
     }
 
     setFormError('');
     setFormSubmitting(true);
-
     try {
       const res = await apiClient.post('/challans', {
         customerId: selectedCustomerId,
-        items: orderItems,
-        status: requestedStatus,
+        items: validItems,
+        requestedStatus: targetStatus,
       });
 
       if (res.data.success) {
-        setIsCreateModalOpen(false);
+        setIsWizardOpen(false);
+        setWizardItems([{ productId: '', quantity: 1 }]);
         setSelectedCustomerId('');
-        setOrderItems([{ productId: '', quantity: 1 }]);
         clientCache.invalidate('/challans');
         clientCache.invalidate('/products');
+        clientCache.invalidate('/customers');
         clientCache.invalidate('/inventory');
         fetchChallans();
       }
     } catch (err: any) {
-      setFormError(err.response?.data?.error?.message || 'Failed to create sales challan');
+      setFormError(err.response?.data?.error?.message || 'Failed to create sales order');
     } finally {
       setFormSubmitting(false);
     }
   };
 
-  const handleStatusChange = async (challanId: string, newStatus: 'CONFIRMED' | 'CANCELLED') => {
+  const handleUpdateStatus = async (challanId: string, targetStatus: 'CONFIRMED' | 'CANCELLED') => {
     try {
       const res = await apiClient.patch(`/challans/${challanId}/status`, {
-        status: newStatus,
+        status: targetStatus,
       });
-
       if (res.data.success) {
         clientCache.invalidate('/challans');
         clientCache.invalidate('/products');
+        clientCache.invalidate('/customers');
         clientCache.invalidate('/inventory');
         fetchChallans();
       }
     } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Status transition failed');
+      alert(err.response?.data?.error?.message || `Failed to set status to ${targetStatus}`);
     }
   };
 
@@ -180,30 +175,42 @@ export function useChallans() {
     }
   };
 
-  const canCreate = user?.role === 'ADMIN' || user?.role === 'SALES';
+  const filteredChallans = challans.filter((c) => {
+    if (!search.trim()) return true;
+    const term = search.toLowerCase();
+    const cNum = c.challanNumber?.toLowerCase() || '';
+    const bName = c.customer?.businessName?.toLowerCase() || '';
+    const cName = c.customer?.name?.toLowerCase() || '';
+    return cNum.includes(term) || bName.includes(term) || cName.includes(term);
+  });
+
+  const canManage = user?.role === 'ADMIN' || user?.role === 'SALES';
 
   return {
-    challans,
+    challans: filteredChallans,
+    rawChallans: challans,
     loading,
+    search,
+    setSearch,
     statusFilter,
     setStatusFilter,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
-    customersList,
-    productsList,
+    isWizardOpen,
+    setIsWizardOpen,
+    customers,
+    products,
     selectedCustomerId,
     setSelectedCustomerId,
-    orderItems,
+    wizardItems,
     formError,
     formSubmitting,
-    canCreate,
-    openCreateWizard,
-    addLineItem,
-    removeLineItem,
-    updateLineItem,
+    canManage,
+    openWizard,
+    handleAddLineItem,
+    handleRemoveLineItem,
+    handleUpdateLineItem,
     calculateGrandTotal,
     handleCreateOrder,
-    handleStatusChange,
+    handleUpdateStatus,
     handleDownloadPdf,
   };
 }

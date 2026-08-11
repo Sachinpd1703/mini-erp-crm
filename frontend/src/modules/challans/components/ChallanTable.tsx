@@ -1,27 +1,34 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SalesChallan } from '../../../types';
 import { Badge } from '../../../components/ui/Badge';
 import { TableSkeleton } from '../../../components/ui/Skeleton';
-import { Download, CheckCircle } from 'lucide-react';
+import { ChallanActionsMenu } from './ChallanActionsMenu';
 
 interface ChallanTableProps {
   challans: SalesChallan[];
   loading: boolean;
-  canCreate: boolean;
-  onStatusChange: (id: string, newStatus: 'CONFIRMED' | 'CANCELLED') => void;
-  onDownloadPdf: (id: string, challanNumber?: string) => void;
+  canManage: boolean;
+  onDownloadPdf: (challanId: string, challanNumber?: string) => void;
+  onUpdateStatus: (challanId: string, status: 'CONFIRMED' | 'CANCELLED') => void;
 }
 
 export const ChallanTable: React.FC<ChallanTableProps> = ({
   challans,
   loading,
-  canCreate,
-  onStatusChange,
+  canManage,
   onDownloadPdf,
+  onUpdateStatus,
 }) => {
+  const navigate = useNavigate();
+
   if (loading) {
     return <TableSkeleton rows={5} cols={6} />;
   }
+
+  const handleRowClick = (challanId: string) => {
+    navigate(`/challans/${challanId}`);
+  };
 
   return (
     <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
@@ -29,9 +36,9 @@ export const ChallanTable: React.FC<ChallanTableProps> = ({
         <table className="w-full text-left text-xs">
           <thead className="bg-[#FDD8A8] dark:bg-slate-800/50 text-[#002A1C] dark:text-slate-400 border-b border-[#F3CEA6] dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
             <tr>
-              <th className="py-3 px-4">Challan #</th>
+              <th className="py-3 px-4">Challan Number</th>
               <th className="py-3 px-4">Customer</th>
-              <th className="py-3 px-4 text-right">Items / Qty</th>
+              <th className="py-3 px-4 text-center">Items / Quantity</th>
               <th className="py-3 px-4 text-right">Grand Total</th>
               <th className="py-3 px-4 text-center">Status</th>
               <th className="py-3 px-4 text-right">Actions</th>
@@ -41,29 +48,37 @@ export const ChallanTable: React.FC<ChallanTableProps> = ({
             {challans.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
-                  No sales challans match current criteria.
+                  No sales challans recorded.
                 </td>
               </tr>
             ) : (
               challans.map((ch) => (
-                <tr key={ch.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
-                  <td className="py-3.5 px-4 font-mono font-bold text-[#004D34] dark:text-sky-400">
-                    {ch.challanNumber}
-                    <p className="text-[10px] text-[#6B5542] dark:text-slate-500 font-sans font-medium">
+                <tr
+                  key={ch.id}
+                  onClick={() => handleRowClick(ch.id)}
+                  className="hover:bg-[#FFFBF7] dark:hover:bg-slate-800/50 transition cursor-pointer group"
+                >
+                  <td className="py-3.5 px-4">
+                    <p className="font-bold text-[#004D34] dark:text-sky-400 font-mono group-hover:underline">
+                      {ch.challanNumber}
+                    </p>
+                    <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">
                       {new Date(ch.createdAt).toLocaleDateString()}
                     </p>
                   </td>
                   <td className="py-3.5 px-4">
                     <p className="font-bold text-[#002A1C] dark:text-white">
-                      {ch.customer?.businessName || ch.customer?.name}
+                      {ch.customer?.businessName || 'N/A'}
                     </p>
-                    <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">Attn: {ch.customer?.name}</p>
+                    <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">
+                      Contact: {ch.customer?.name}
+                    </p>
                   </td>
-                  <td className="py-3.5 px-4 text-right text-[#002A1C] dark:text-slate-300">
-                    <span className="font-bold text-[#002A1C] dark:text-white">{ch.totalQuantity} Units</span>
+                  <td className="py-3.5 px-4 text-center text-[#6B5542] dark:text-slate-300 font-semibold">
+                    {ch._count?.items || ch.items?.length || 0} Items ({ch.totalQuantity || 0} Pcs)
                   </td>
-                  <td className="py-3.5 px-4 text-right font-bold text-[#002A1C] dark:text-white">
-                    INR {Number(ch.totalAmount).toFixed(2)}
+                  <td className="py-3.5 px-4 text-right font-extrabold text-[#002A1C] dark:text-white text-sm">
+                    INR {Number(ch.totalAmount || 0).toFixed(2)}
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     <Badge
@@ -77,35 +92,17 @@ export const ChallanTable: React.FC<ChallanTableProps> = ({
                       }
                     />
                   </td>
-                  <td className="py-3.5 px-4 text-right space-x-2">
-                    {ch.status === 'DRAFT' && canCreate && (
-                      <>
-                        <button
-                          onClick={() => onStatusChange(ch.id, 'CONFIRMED')}
-                          title="Confirm & Deduct Stock"
-                          className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-800 dark:text-emerald-400 border border-emerald-500/30 rounded-lg transition text-[11px] font-bold inline-flex items-center space-x-1"
-                        >
-                          <CheckCircle className="w-3 h-3" />
-                          <span>Confirm Order</span>
-                        </button>
-
-                        <button
-                          onClick={() => onStatusChange(ch.id, 'CANCELLED')}
-                          title="Cancel Draft"
-                          className="px-2 py-1 bg-red-600/10 hover:bg-red-600/20 text-red-700 dark:text-red-400 border border-red-500/20 rounded-lg transition text-[11px] font-bold"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    )}
-
-                    <button
-                      onClick={() => onDownloadPdf(ch.id, ch.challanNumber)}
-                      className="px-2.5 py-1 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition text-[11px] inline-flex items-center space-x-1"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>Invoice PDF</span>
-                    </button>
+                  <td
+                    className="py-3.5 px-4 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ChallanActionsMenu
+                      challan={ch}
+                      canManage={canManage}
+                      onViewChallan={() => handleRowClick(ch.id)}
+                      onDownloadPdf={onDownloadPdf}
+                      onUpdateStatus={onUpdateStatus}
+                    />
                   </td>
                 </tr>
               ))

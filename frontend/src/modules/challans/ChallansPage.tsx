@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { useChallans } from './hooks/useChallans';
+import { ChallanMetricsCards } from './components/ChallanMetricsCards';
 import { ChallanFilterBar } from './components/ChallanFilterBar';
 import { ChallanTable } from './components/ChallanTable';
 import { CreateChallanWizardModal } from './components/CreateChallanWizardModal';
@@ -8,77 +9,84 @@ import { CreateChallanWizardModal } from './components/CreateChallanWizardModal'
 export const ChallansPage: React.FC = () => {
   const {
     challans,
+    rawChallans,
     loading,
+    search,
+    setSearch,
     statusFilter,
     setStatusFilter,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
-    customersList,
-    productsList,
+    isWizardOpen,
+    setIsWizardOpen,
+    customers,
+    products,
     selectedCustomerId,
     setSelectedCustomerId,
-    orderItems,
+    wizardItems,
     formError,
     formSubmitting,
-    canCreate,
-    openCreateWizard,
-    addLineItem,
-    removeLineItem,
-    updateLineItem,
+    canManage,
+    openWizard,
+    handleAddLineItem,
+    handleRemoveLineItem,
+    handleUpdateLineItem,
     calculateGrandTotal,
     handleCreateOrder,
-    handleStatusChange,
+    handleUpdateStatus,
     handleDownloadPdf,
   } = useChallans();
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-[#002A1C] dark:text-white tracking-tight">Sales Challans & Order Fulfillment</h2>
-          <p className="text-xs text-[#6B5542] dark:text-slate-400">Generate sales orders, trigger atomic stock deductions, and download invoices</p>
+          <h2 className="text-xl font-bold text-[#002A1C] dark:text-white tracking-tight">Sales Orders & Challans</h2>
+          <p className="text-xs text-[#6B5542] dark:text-slate-400">Order fulfillment lifecycle, inventory deductions, and billing invoices</p>
         </div>
 
-        {canCreate && (
+        {canManage && (
           <button
-            onClick={openCreateWizard}
+            onClick={openWizard}
             className="px-4 py-2.5 bg-[#004D34] hover:bg-[#003826] dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-md transition flex items-center space-x-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Sales Challan</span>
+            <span>Create Sales Order</span>
           </button>
         )}
       </div>
 
-      {/* Filter Bar */}
+      {/* Summary KPI Cards */}
+      <ChallanMetricsCards challans={rawChallans} loading={loading} />
+
+      {/* Filter & Search Bar */}
       <ChallanFilterBar
+        search={search}
+        onSearchChange={setSearch}
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
-        totalOrders={challans.length}
       />
 
-      {/* Challans Table */}
+      {/* Challans Data Table */}
       <ChallanTable
         challans={challans}
         loading={loading}
-        canCreate={canCreate}
-        onStatusChange={handleStatusChange}
+        canManage={canManage}
         onDownloadPdf={handleDownloadPdf}
+        onUpdateStatus={handleUpdateStatus}
       />
 
-      {/* Create Sales Order Wizard Modal */}
+      {/* Create Order Wizard Modal */}
       <CreateChallanWizardModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        customersList={customersList}
-        productsList={productsList}
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        customersList={customers}
+        productsList={products}
         selectedCustomerId={selectedCustomerId}
         onSelectCustomer={setSelectedCustomerId}
-        orderItems={orderItems}
-        onAddLineItem={addLineItem}
-        onRemoveLineItem={removeLineItem}
-        onUpdateLineItem={updateLineItem}
+        orderItems={wizardItems}
+        onAddLineItem={handleAddLineItem}
+        onRemoveLineItem={handleRemoveLineItem}
+        onUpdateLineItem={handleUpdateLineItem}
         calculateGrandTotal={calculateGrandTotal}
         onCreateOrder={handleCreateOrder}
         formError={formError}

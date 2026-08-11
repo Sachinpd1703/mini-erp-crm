@@ -10,6 +10,7 @@ import { ProductsPage } from '../modules/products/ProductsPage';
 import { ProductDetailPage } from '../modules/products/ProductDetailPage';
 import { InventoryPage } from '../modules/inventory/InventoryPage';
 import { ChallansPage } from '../modules/challans/ChallansPage';
+import { ChallanDetailPage } from '../modules/challans/ChallanDetailPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -98,6 +99,15 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <ChallansPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/challans/:id"
+        element={
+          <ProtectedRoute>
+            <ChallanDetailPage />
           </ProtectedRoute>
         }
       />
