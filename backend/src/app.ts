@@ -9,6 +9,7 @@ import customerRoutes from './modules/customers/customer.routes';
 import productRoutes from './modules/products/product.routes';
 import inventoryRoutes from './modules/inventory/inventory.routes';
 import challanRoutes from './modules/challans/challan.routes';
+import userRoutes from './modules/users/user.routes';
 
 // Import Centralized Error Handler
 import { errorHandler } from './middlewares/error.middleware';
@@ -41,6 +42,7 @@ app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/inventory', inventoryRoutes);
 app.use('/api/v1/challans', challanRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // 404 Handler for undefined routes
 app.use((_req: Request, res: Response) => {

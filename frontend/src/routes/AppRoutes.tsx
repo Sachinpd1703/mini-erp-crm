@@ -11,13 +11,14 @@ import { ProductDetailPage } from '../modules/products/ProductDetailPage';
 import { InventoryPage } from '../modules/inventory/InventoryPage';
 import { ChallansPage } from '../modules/challans/ChallansPage';
 import { ChallanDetailPage } from '../modules/challans/ChallanDetailPage';
+import { UsersPage } from '../modules/users/UsersPage';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs">
+      <div className="min-h-screen bg-[#FFFBF7] dark:bg-slate-950 flex items-center justify-center text-[#6B5542] dark:text-slate-400 text-xs">
         Verifying Authentication...
       </div>
     );
@@ -25,6 +26,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <DashboardLayout>{children}</DashboardLayout>;
@@ -108,6 +113,15 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <ChallanDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <UsersPage />
           </ProtectedRoute>
         }
       />

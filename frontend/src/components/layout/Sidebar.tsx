@@ -7,6 +7,7 @@ import {
   History,
   FileText,
   ShieldAlert,
+  UserCog,
 } from 'lucide-react';
 import { useAuth } from '../../modules/auth/AuthContext';
 
@@ -19,6 +20,7 @@ export const Sidebar: React.FC = () => {
     { label: 'Product Catalog', path: '/products', icon: Package, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
     { label: 'Inventory Audit', path: '/inventory', icon: History, roles: ['ADMIN', 'WAREHOUSE', 'ACCOUNTS'] },
     { label: 'Sales Challans', path: '/challans', icon: FileText, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
+    { label: 'Staff Accounts', path: '/users', icon: UserCog, roles: ['ADMIN'] },
   ];
 
   const allowedNav = navItems.filter((item) => user && item.roles.includes(user.role));
