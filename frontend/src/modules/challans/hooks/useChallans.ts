@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SalesChallan, Customer, Product, ChallanStatus } from '../../../types';
-import { apiClient } from '../../../services/api';
+import { apiClient, API_BASE_URL } from '../../../services/api';
 import { clientCache, getCachedData } from '../../../services/apiCache';
 import { useAuth } from '../../auth/AuthContext';
 
@@ -171,7 +171,7 @@ export function useChallans() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       const token = localStorage.getItem('mini_erp_token');
-      window.open(`http://localhost:5000/api/v1/challans/${challanId}/pdf?token=${token}`, '_blank');
+      window.open(`${API_BASE_URL}/challans/${challanId}/pdf?token=${token}`, '_blank');
     }
   };
 

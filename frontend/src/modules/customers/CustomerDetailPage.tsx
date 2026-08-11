@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Customer, SalesChallan } from '../../types';
-import { apiClient } from '../../services/api';
+import { apiClient, API_BASE_URL } from '../../services/api';
 import { clientCache, getCachedData } from '../../services/apiCache';
 import { exportCustomerStatementToExcel } from '../../utils/exportExcel';
 import { Badge } from '../../components/ui/Badge';
@@ -153,7 +153,7 @@ export const CustomerDetailPage: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       const token = localStorage.getItem('mini_erp_token');
-      window.open(`http://localhost:5000/api/v1/challans/${challanId}/pdf?token=${token}`, '_blank');
+      window.open(`${API_BASE_URL}/challans/${challanId}/pdf?token=${token}`, '_blank');
     }
   };
 

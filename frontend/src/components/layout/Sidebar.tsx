@@ -68,26 +68,13 @@ export const Sidebar: React.FC = () => {
 
       {/* Bottom User Info & Logout Block */}
       <div className="space-y-2 pt-4 border-t border-[#F3CEA6]/20 dark:border-slate-800">
-        <div className="p-3 bg-[#003B28] dark:bg-slate-900/60 border border-[#F3CEA6]/30 dark:border-slate-800 rounded-xl space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-[#E2F5EE]">
-            <span className="font-semibold truncate max-w-[120px]">{user?.fullName || 'User'}</span>
-            <span className="font-bold text-[#FFE4C4] dark:text-emerald-400 text-[10px] px-2 py-0.5 bg-[#002A1C] dark:bg-slate-800 rounded border border-[#F3CEA6]/20">
-              {user?.role}
-            </span>
-          </div>
-          <div className="text-[10px] text-[#8CBCAE] dark:text-slate-400 flex items-center space-x-1">
-            <ShieldAlert className="w-3 h-3 text-[#8CBCAE]" />
-            <span>RBAC Active</span>
-          </div>
-        </div>
-
         {/* Logout Button */}
         <button
           onClick={logout}
           className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition shadow-sm"
         >
           <LogOut className="w-4 h-4" />
-          <span>Sign Out / Logout</span>
+          <span>Logout</span>
         </button>
       </div>
     </aside>

@@ -72,7 +72,7 @@ export const Header: React.FC = () => {
 
         {/* Logout Action */}
         <button
-          onClick={logout}
+          onClick={logout}  
           title="Sign Out"
           className="p-2 text-[#8CBCAE] hover:text-red-300 hover:bg-red-500/20 rounded-xl transition border border-transparent"
         >

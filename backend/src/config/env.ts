@@ -9,5 +9,5 @@ export const env = {
   DATABASE_URL: process.env.DATABASE_URL || '',
   JWT_SECRET: process.env.JWT_SECRET || 'mini_erp_super_secret_jwt_key_2026',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '8h',
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
 };
