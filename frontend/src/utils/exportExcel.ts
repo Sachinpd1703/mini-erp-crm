@@ -1,7 +1,8 @@
+import * as XLSX from 'xlsx';
 import { StockMovement } from '../types';
 
 /**
- * Utility to export Inventory Audit Trail logs directly into Microsoft Excel (.csv / .xlsx compatible) format
+ * Utility to export Inventory Audit Trail logs directly into genuine Microsoft Excel (.xlsx) format
  */
 export function exportInventoryAuditToExcel(movements: StockMovement[], filename = 'Inventory_Audit_Log') {
   if (!movements || movements.length === 0) {
@@ -9,45 +10,38 @@ export function exportInventoryAuditToExcel(movements: StockMovement[], filename
     return;
   }
 
-  // Define Headers
-  const headers = [
-    'Timestamp',
-    'Movement Type',
-    'Product Name',
-    'SKU Code',
-    'Quantity Changed',
-    'Reason / Source Description',
-    'Authorized By',
-    'Role',
+  // Format JSON records for SheetJS
+  const data = movements.map((m) => ({
+    'Timestamp': new Date(m.createdAt).toLocaleString(),
+    'Movement Type': m.movementType,
+    'Product Name': m.product?.name || 'Product',
+    'SKU Code': m.product?.sku || 'N/A',
+    'Quantity Changed': m.movementType === 'IN' ? `+${m.quantity}` : `-${m.quantity}`,
+    'Reason / Description': m.reason || '',
+    'Authorized By': m.author?.fullName || 'System User',
+    'Role': m.author?.role || '',
+  }));
+
+  // Create worksheet
+  const worksheet = XLSX.utils.json_to_sheet(data);
+
+  // Configure custom column widths for clean Excel layout
+  worksheet['!cols'] = [
+    { wch: 22 }, // Timestamp
+    { wch: 15 }, // Movement Type
+    { wch: 30 }, // Product Name
+    { wch: 18 }, // SKU Code
+    { wch: 18 }, // Quantity Changed
+    { wch: 42 }, // Reason / Description
+    { wch: 22 }, // Authorized By
+    { wch: 15 }, // Role
   ];
 
-  // Map Data Rows
-  const rows = movements.map((m) => {
-    const timestamp = new Date(m.createdAt).toLocaleString();
-    const movementType = m.movementType;
-    const productName = `"${(m.product?.name || '').replace(/"/g, '""')}"`;
-    const sku = `"${(m.product?.sku || '').replace(/"/g, '""')}"`;
-    const qty = m.movementType === 'IN' ? `+${m.quantity}` : `-${m.quantity}`;
-    const reason = `"${(m.reason || '').replace(/"/g, '""')}"`;
-    const author = `"${(m.author?.fullName || 'System').replace(/"/g, '""')}"`;
-    const role = `"${(m.author?.role || '').replace(/"/g, '""')}"`;
+  // Create workbook and append sheet
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory Audit');
 
-    return [timestamp, movementType, productName, sku, qty, reason, author, role].join(',');
-  });
-
-  // Combine CSV content with UTF-8 BOM for Microsoft Excel compatibility
-  const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-
-  // Create downloadable Blob
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
+  // Trigger binary .xlsx download
   const dateStr = new Date().toISOString().split('T')[0];
-  link.setAttribute('download', `${filename}_${dateStr}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  XLSX.writeFile(workbook, `${filename}_${dateStr}.xlsx`);
 }
