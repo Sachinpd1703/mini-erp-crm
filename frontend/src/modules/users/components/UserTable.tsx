@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, Role } from '../../../types';
 import { TableSkeleton } from '../../../components/ui/Skeleton';
-import { Shield, ShieldAlert, Briefcase, Warehouse, CreditCard, Trash2, Edit3 } from 'lucide-react';
+import { Trash2, Edit3 } from 'lucide-react';
 
 interface UserTableProps {
   users: User[];
@@ -28,35 +28,31 @@ export const UserTable: React.FC<UserTableProps> = ({
     switch (role) {
       case 'ADMIN':
         return (
-          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 uppercase">
-            <ShieldAlert className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-            <span>ADMIN</span>
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 uppercase tracking-wide">
+            ADMIN
           </span>
         );
       case 'SALES':
         return (
-          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 uppercase">
-            <Briefcase className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-            <span>SALES</span>
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
+            SALES
           </span>
         );
       case 'WAREHOUSE':
         return (
-          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-500/30 uppercase">
-            <Warehouse className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
-            <span>WAREHOUSE</span>
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-500/30 uppercase tracking-wide">
+            WAREHOUSE
           </span>
         );
       case 'ACCOUNTS':
         return (
-          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-500/30 uppercase">
-            <CreditCard className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-            <span>ACCOUNTS</span>
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-500/30 uppercase tracking-wide">
+            ACCOUNTS
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase">
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
             {role}
           </span>
         );
