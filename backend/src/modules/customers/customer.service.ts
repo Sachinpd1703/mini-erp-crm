@@ -75,14 +75,12 @@ export class CustomerService {
         },
         salesChallans: {
           orderBy: { createdAt: 'desc' },
-          take: 5,
-          select: {
-            id: true,
-            challanNumber: true,
-            status: true,
-            totalAmount: true,
-            totalQuantity: true,
-            createdAt: true,
+          include: {
+            items: {
+              include: {
+                product: { select: { id: true, name: true, sku: true, unitPrice: true } },
+              },
+            },
           },
         },
       },

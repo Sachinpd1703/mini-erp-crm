@@ -5,6 +5,7 @@ import { LoginPage } from '../modules/auth/LoginPage';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { DashboardPage } from '../modules/dashboard/DashboardPage';
 import { CustomersPage } from '../modules/customers/CustomersPage';
+import { CustomerDetailPage } from '../modules/customers/CustomerDetailPage';
 import { ProductsPage } from '../modules/products/ProductsPage';
 import { InventoryPage } from '../modules/inventory/InventoryPage';
 import { ChallansPage } from '../modules/challans/ChallansPage';
@@ -51,6 +52,15 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <CustomersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/customers/:id"
+        element={
+          <ProtectedRoute>
+            <CustomerDetailPage />
           </ProtectedRoute>
         }
       />

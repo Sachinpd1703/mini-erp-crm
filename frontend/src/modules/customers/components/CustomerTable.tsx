@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Customer } from '../../../types';
 import { Badge } from '../../../components/ui/Badge';
 import { TableSkeleton } from '../../../components/ui/Skeleton';
@@ -9,7 +10,7 @@ interface CustomerTableProps {
   customers: Customer[];
   loading: boolean;
   canEdit: boolean;
-  onViewDetail: (customer: Customer) => void;
+  onViewDetail?: (customer: Customer) => void;
   onEditCustomer: (customer: Customer) => void;
   onAddNote: (customer: Customer) => void;
   onCreateSalesOrder?: (customer: Customer) => void;
@@ -24,9 +25,15 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
   onAddNote,
   onCreateSalesOrder,
 }) => {
+  const navigate = useNavigate();
+
   if (loading) {
     return <TableSkeleton rows={5} cols={6} />;
   }
+
+  const handleRowClick = (customerId: string) => {
+    navigate(`/customers/${customerId}`);
+  };
 
   return (
     <div className="bg-[#fef7ee] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
@@ -51,9 +58,15 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
               </tr>
             ) : (
               customers.map((cust) => (
-                <tr key={cust.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
+                <tr
+                  key={cust.id}
+                  onClick={() => handleRowClick(cust.id)}
+                  className="hover:bg-[#FFFBF7] dark:hover:bg-slate-800/50 transition cursor-pointer group"
+                >
                   <td className="py-3.5 px-4">
-                    <p className="font-bold text-[#002A1C] dark:text-white">{cust.businessName}</p>
+                    <p className="font-bold text-[#002A1C] dark:text-white group-hover:text-[#004D34] dark:group-hover:text-sky-400 transition">
+                      {cust.businessName}
+                    </p>
                     <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">{cust.name}</p>
                   </td>
                   <td className="py-3.5 px-4 text-[#002A1C] dark:text-slate-300">
@@ -88,11 +101,14 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
                       ? new Date(cust.followUpDate).toLocaleDateString()
                       : 'Not scheduled'}
                   </td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td
+                    className="py-3.5 px-4 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <CustomerActionsMenu
                       customer={cust}
                       canEdit={canEdit}
-                      onViewProfile={onViewDetail}
+                      onViewProfile={() => handleRowClick(cust.id)}
                       onEditCustomer={onEditCustomer}
                       onAddNote={onAddNote}
                       onCreateSalesOrder={onCreateSalesOrder}

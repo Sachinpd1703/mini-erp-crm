@@ -67,6 +67,7 @@ export interface Customer {
   followUpDate?: string | null;
   createdAt: string;
   notes?: CustomerNote[];
+  salesChallans?: SalesChallan[];
   _count?: {
     salesChallans: number;
   };
