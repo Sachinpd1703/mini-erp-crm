@@ -49,7 +49,7 @@ export class UserController {
   static async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const requestingUserId = (req as any).user.id;
+      const requestingUserId = (req as any).user?.userId || (req as any).user?.id;
       const result = await UserService.deleteUser(id, requestingUserId);
 
       res.status(200).json({

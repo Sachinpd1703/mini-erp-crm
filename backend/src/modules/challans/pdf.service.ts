@@ -1,7 +1,7 @@
 import PDFDocument from 'pdfkit';
 
 export class PdfService {
-  static generateChallanPdf(challan: any): PDFDocument {
+  static generateChallanPdf(challan: any): any {
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
     // 1. Header & Branding

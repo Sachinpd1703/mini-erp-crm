@@ -1,5 +1,5 @@
 import prisma from '../../config/database';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Role, Prisma } from '@prisma/client';
 import { NotFoundError, BadRequestError } from '../../common/errors/app-error';
 

@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { UserController } from './user.controller';
-import { authenticate, authorize } from '../../middlewares/auth.middleware';
+import { authenticateJwt } from '../../middlewares/auth.middleware';
+import { authorizeRoles } from '../../middlewares/role.middleware';
 import { Role } from '@prisma/client';
 
 const router = Router();
 
 // Protect all user management endpoints (Requires Login & ADMIN Role)
-router.use(authenticate);
-router.use(authorize([Role.ADMIN]));
+router.use(authenticateJwt);
+router.use(authorizeRoles(Role.ADMIN));
 
 router.get('/', UserController.getUsers);
 router.post('/', UserController.createUser);
