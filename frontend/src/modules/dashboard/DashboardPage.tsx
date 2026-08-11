@@ -4,6 +4,7 @@ import { Badge } from '../../components/ui/Badge';
 import { CardSkeleton, TableSkeleton } from '../../components/ui/Skeleton';
 import { Users, Package, FileText, AlertTriangle, RefreshCw } from 'lucide-react';
 import { apiClient } from '../../services/api';
+import { clientCache, getCachedData } from '../../services/apiCache';
 import { Product, SalesChallan } from '../../types';
 
 export const DashboardPage: React.FC = () => {
@@ -18,14 +19,41 @@ export const DashboardPage: React.FC = () => {
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
   const [recentChallans, setRecentChallans] = useState<SalesChallan[]>([]);
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
+  const fetchDashboardData = async (forceRefresh = false) => {
+    if (forceRefresh) {
+      clientCache.invalidate('/customers');
+      clientCache.invalidate('/inventory');
+      clientCache.invalidate('/products');
+      clientCache.invalidate('/challans');
+    }
+
+    // Check if we have instant cached data available
+    const cachedCust = clientCache.get<any>('/customers', { limit: 1 });
+    const cachedInv = clientCache.get<any>('/inventory/overview');
+    const cachedLow = clientCache.get<any>('/products', { lowStockOnly: true, limit: 5 });
+    const cachedChal = clientCache.get<any>('/challans', { limit: 5 });
+
+    const hasFullCache = cachedCust && cachedInv && cachedLow && cachedChal;
+
+    if (hasFullCache && !forceRefresh) {
+      setTotalCustomers(cachedCust.meta?.total || 0);
+      setInventoryOverview(cachedInv.data || cachedInv);
+      setLowStockProducts(cachedLow.data || []);
+      setRecentChallans(cachedChal.data || []);
+      setLoading(false);
+      return;
+    }
+
+    if (!hasFullCache) {
+      setLoading(true);
+    }
+
     try {
       const [custRes, invRes, lowStockRes, challanRes] = await Promise.all([
-        apiClient.get('/customers?limit=1'),
-        apiClient.get('/inventory/overview'),
-        apiClient.get('/products?lowStockOnly=true&limit=5'),
-        apiClient.get('/challans?limit=5'),
+        getCachedData('/customers', { limit: 1 }),
+        getCachedData('/inventory/overview'),
+        getCachedData('/products', { lowStockOnly: true, limit: 5 }),
+        getCachedData('/challans', { limit: 5 }),
       ]);
 
       if (custRes.data.success) setTotalCustomers(custRes.data.meta?.total || 0);
@@ -52,9 +80,9 @@ export const DashboardPage: React.FC = () => {
           <p className="text-xs text-[#6B5542] dark:text-slate-400">Real-time overview of distribution metrics and sales flow</p>
         </div>
         <button
-          onClick={fetchDashboardData}
+          onClick={() => fetchDashboardData(true)}
           disabled={loading}
-          className="px-3.5 py-2 bg-[#FFE4C4] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 border border-[#F3CEA6] dark:border-slate-700 text-[#002A1C] dark:text-slate-300 text-xs font-semibold rounded-xl transition flex items-center space-x-2"
+          className="px-3.5 py-2 bg-[#FFE4C4] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 border border-[#F3CEA6] dark:border-slate-700 text-[#002A1C] dark:text-slate-300 text-xs font-semibold rounded-xl transition flex items-center space-x-2 shadow-sm"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh Data</span>

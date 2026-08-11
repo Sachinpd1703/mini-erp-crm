@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { SalesChallan, Customer, Product, ChallanStatus } from '../../types';
 import { apiClient } from '../../services/api';
+import { clientCache, getCachedData } from '../../services/apiCache';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 import { FileText, Plus, Download, CheckCircle, XCircle, Trash2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -26,12 +28,19 @@ export const ChallansPage: React.FC = () => {
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   const fetchChallans = async () => {
+    const params: any = {};
+    if (statusFilter) params.status = statusFilter;
+
+    const cached = clientCache.get<any>('/challans', params);
+    if (cached) {
+      setChallans(cached.data || []);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const params: any = {};
-      if (statusFilter) params.status = statusFilter;
-
-      const res = await apiClient.get('/challans', { params });
+      const res = await getCachedData('/challans', params);
       if (res.data.success) {
         setChallans(res.data.data);
       }
@@ -113,6 +122,9 @@ export const ChallansPage: React.FC = () => {
         setIsCreateModalOpen(false);
         setSelectedCustomerId('');
         setOrderItems([{ productId: '', quantity: 1 }]);
+        clientCache.invalidate('/challans');
+        clientCache.invalidate('/products');
+        clientCache.invalidate('/inventory');
         fetchChallans();
       }
     } catch (err: any) {
@@ -129,6 +141,9 @@ export const ChallansPage: React.FC = () => {
       });
 
       if (res.data.success) {
+        clientCache.invalidate('/challans');
+        clientCache.invalidate('/products');
+        clientCache.invalidate('/inventory');
         fetchChallans();
       }
     } catch (err: any) {
@@ -194,103 +209,101 @@ export const ChallansPage: React.FC = () => {
         <span className="text-xs text-[#6B5542] dark:text-slate-400 font-medium">{challans.length} Orders</span>
       </div>
 
-      {/* Challans Table */}
-      <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#FDD8A8] dark:bg-slate-800/50 text-[#002A1C] dark:text-slate-400 border-b border-[#F3CEA6] dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
-              <tr>
-                <th className="py-3 px-4">Challan #</th>
-                <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4 text-right">Items / Qty</th>
-                <th className="py-3 px-4 text-right">Grand Total</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F3CEA6]/50 dark:divide-slate-800/50">
-              {loading ? (
+      {/* Challans Table / Skeleton */}
+      {loading ? (
+        <TableSkeleton rows={5} cols={6} />
+      ) : (
+        <div className="bg-[#FFE4C4] dark:bg-slate-900 border border-[#F3CEA6] dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#FDD8A8] dark:bg-slate-800/50 text-[#002A1C] dark:text-slate-400 border-b border-[#F3CEA6] dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
-                    Loading sales challans...
-                  </td>
+                  <th className="py-3 px-4">Challan #</th>
+                  <th className="py-3 px-4">Customer</th>
+                  <th className="py-3 px-4 text-right">Items / Qty</th>
+                  <th className="py-3 px-4 text-right">Grand Total</th>
+                  <th className="py-3 px-4 text-center">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
-              ) : challans.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
-                    No sales challans match current criteria.
-                  </td>
-                </tr>
-              ) : (
-                challans.map((ch) => (
-                  <tr key={ch.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#004D34] dark:text-sky-400">
-                      {ch.challanNumber}
-                      <p className="text-[10px] text-[#6B5542] dark:text-slate-500 font-sans font-medium">
-                        {new Date(ch.createdAt).toLocaleDateString()}
-                      </p>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-[#002A1C] dark:text-white">
-                        {ch.customer?.businessName || ch.customer?.name}
-                      </p>
-                      <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">Attn: {ch.customer?.name}</p>
-                    </td>
-                    <td className="py-3.5 px-4 text-right text-[#002A1C] dark:text-slate-300">
-                      <span className="font-bold text-[#002A1C] dark:text-white">{ch.totalQuantity} Units</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-[#002A1C] dark:text-white">
-                      INR {Number(ch.totalAmount).toFixed(2)}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <Badge
-                        label={ch.status}
-                        variant={
-                          ch.status === 'CONFIRMED'
-                            ? 'success'
-                            : ch.status === 'DRAFT'
-                            ? 'warning'
-                            : 'danger'
-                        }
-                      />
-                    </td>
-                    <td className="py-3.5 px-4 text-right space-x-2">
-                      {ch.status === 'DRAFT' && canCreate && (
-                        <>
-                          <button
-                            onClick={() => handleStatusChange(ch.id, 'CONFIRMED')}
-                            title="Confirm & Deduct Stock"
-                            className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-800 dark:text-emerald-400 border border-emerald-500/30 rounded-lg transition text-[11px] font-bold inline-flex items-center space-x-1"
-                          >
-                            <CheckCircle className="w-3 h-3" />
-                            <span>Confirm Order</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleStatusChange(ch.id, 'CANCELLED')}
-                            title="Cancel Draft"
-                            className="px-2 py-1 bg-red-600/10 hover:bg-red-600/20 text-red-700 dark:text-red-400 border border-red-500/20 rounded-lg transition text-[11px] font-bold"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-
-                      <button
-                        onClick={() => handleDownloadPdf(ch.id, ch.challanNumber)}
-                        className="px-2.5 py-1 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition text-[11px] inline-flex items-center space-x-1"
-                      >
-                        <Download className="w-3 h-3" />
-                        <span>Invoice PDF</span>
-                      </button>
+              </thead>
+              <tbody className="divide-y divide-[#F3CEA6]/50 dark:divide-slate-800/50">
+                {challans.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-[#6B5542] dark:text-slate-500 font-medium">
+                      No sales challans match current criteria.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  challans.map((ch) => (
+                    <tr key={ch.id} className="hover:bg-[#FFFBF7]/60 dark:hover:bg-slate-800/30 transition">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#004D34] dark:text-sky-400">
+                        {ch.challanNumber}
+                        <p className="text-[10px] text-[#6B5542] dark:text-slate-500 font-sans font-medium">
+                          {new Date(ch.createdAt).toLocaleDateString()}
+                        </p>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-[#002A1C] dark:text-white">
+                          {ch.customer?.businessName || ch.customer?.name}
+                        </p>
+                        <p className="text-[11px] text-[#6B5542] dark:text-slate-400 font-medium">Attn: {ch.customer?.name}</p>
+                      </td>
+                      <td className="py-3.5 px-4 text-right text-[#002A1C] dark:text-slate-300">
+                        <span className="font-bold text-[#002A1C] dark:text-white">{ch.totalQuantity} Units</span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-bold text-[#002A1C] dark:text-white">
+                        INR {Number(ch.totalAmount).toFixed(2)}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <Badge
+                          label={ch.status}
+                          variant={
+                            ch.status === 'CONFIRMED'
+                              ? 'success'
+                              : ch.status === 'DRAFT'
+                              ? 'warning'
+                              : 'danger'
+                          }
+                        />
+                      </td>
+                      <td className="py-3.5 px-4 text-right space-x-2">
+                        {ch.status === 'DRAFT' && canCreate && (
+                          <>
+                            <button
+                              onClick={() => handleStatusChange(ch.id, 'CONFIRMED')}
+                              title="Confirm & Deduct Stock"
+                              className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-800 dark:text-emerald-400 border border-emerald-500/30 rounded-lg transition text-[11px] font-bold inline-flex items-center space-x-1"
+                            >
+                              <CheckCircle className="w-3 h-3" />
+                              <span>Confirm Order</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleStatusChange(ch.id, 'CANCELLED')}
+                              title="Cancel Draft"
+                              className="px-2 py-1 bg-red-600/10 hover:bg-red-600/20 text-red-700 dark:text-red-400 border border-red-500/20 rounded-lg transition text-[11px] font-bold"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+
+                        <button
+                          onClick={() => handleDownloadPdf(ch.id, ch.challanNumber)}
+                          className="px-2.5 py-1 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition text-[11px] inline-flex items-center space-x-1"
+                        >
+                          <Download className="w-3 h-3" />
+                          <span>Invoice PDF</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Create Sales Order Wizard Modal */}
       <Modal

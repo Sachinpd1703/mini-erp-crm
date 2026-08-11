@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Customer, CustomerStatus, CustomerType } from '../../types';
 import { apiClient } from '../../services/api';
+import { clientCache, getCachedData } from '../../services/apiCache';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { TableSkeleton } from '../../components/ui/Skeleton';
@@ -36,14 +37,21 @@ export const CustomersPage: React.FC = () => {
   const [formError, setFormError] = useState('');
 
   const fetchCustomers = async () => {
+    const params: any = {};
+    if (search) params.search = search;
+    if (statusFilter) params.status = statusFilter;
+    if (typeFilter) params.type = typeFilter;
+
+    const cached = clientCache.get<any>('/customers', params);
+    if (cached) {
+      setCustomers(cached.data || []);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const params: any = {};
-      if (search) params.search = search;
-      if (statusFilter) params.status = statusFilter;
-      if (typeFilter) params.type = typeFilter;
-
-      const res = await apiClient.get('/customers', { params });
+      const res = await getCachedData('/customers', params);
       if (res.data.success) {
         setCustomers(res.data.data);
       }
@@ -76,6 +84,7 @@ export const CustomersPage: React.FC = () => {
           status: 'LEAD',
           followUpDate: '',
         });
+        clientCache.invalidate('/customers');
         fetchCustomers();
       }
     } catch (err: any) {

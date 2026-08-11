@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Product, MovementType } from '../../types';
 import { apiClient } from '../../services/api';
+import { clientCache, getCachedData } from '../../services/apiCache';
 import { Modal } from '../../components/ui/Modal';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 import { Search, Plus, Package, Layers, AlertTriangle, ArrowUpDown } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -36,13 +38,20 @@ export const ProductsPage: React.FC = () => {
   const [formError, setFormError] = useState('');
 
   const fetchProducts = async () => {
+    const params: any = {};
+    if (search) params.search = search;
+    if (categoryFilter) params.category = categoryFilter;
+
+    const cached = clientCache.get<any>('/products', params);
+    if (cached) {
+      setProducts(cached.data || []);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const params: any = {};
-      if (search) params.search = search;
-      if (categoryFilter) params.category = categoryFilter;
-
-      const res = await apiClient.get('/products', { params });
+      const res = await getCachedData('/products', params);
       if (res.data.success) {
         setProducts(res.data.data);
       }
@@ -79,6 +88,8 @@ export const ProductsPage: React.FC = () => {
           minStockAlert: 5,
           location: '',
         });
+        clientCache.invalidate('/products');
+        clientCache.invalidate('/inventory');
         fetchProducts();
       }
     } catch (err: any) {
@@ -101,6 +112,8 @@ export const ProductsPage: React.FC = () => {
       if (res.data.success) {
         setStockModalProduct(null);
         setStockAdjustData({ quantity: 1, movementType: 'IN', reason: '' });
+        clientCache.invalidate('/products');
+        clientCache.invalidate('/inventory');
         fetchProducts();
       }
     } catch (err: any) {
