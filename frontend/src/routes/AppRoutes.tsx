@@ -12,6 +12,7 @@ import { InventoryPage } from '../modules/inventory/InventoryPage';
 import { ChallansPage } from '../modules/challans/ChallansPage';
 import { ChallanDetailPage } from '../modules/challans/ChallanDetailPage';
 import { UsersPage } from '../modules/users/UsersPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -126,7 +127,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };
