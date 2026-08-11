@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Customer, CustomerStatus, CustomerType } from '../../../types';
 import { apiClient } from '../../../services/api';
 import { clientCache, getCachedData } from '../../../services/apiCache';
@@ -6,6 +7,7 @@ import { useAuth } from '../../auth/AuthContext';
 
 export function useCustomers() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -15,11 +17,25 @@ export function useCustomers() {
   // Modal & Drawer States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [newNote, setNewNote] = useState('');
   const [formError, setFormError] = useState('');
 
-  // Form State
+  // Add Form State
   const [formData, setFormData] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    businessName: '',
+    gstNumber: '',
+    customerType: 'RETAIL' as CustomerType,
+    address: '',
+    status: 'LEAD' as CustomerStatus,
+    followUpDate: '',
+  });
+
+  // Edit Form State
+  const [editFormData, setEditFormData] = useState({
     name: '',
     mobile: '',
     email: '',
@@ -87,6 +103,40 @@ export function useCustomers() {
     }
   };
 
+  const openEditModal = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setFormError('');
+    setEditFormData({
+      name: customer.name || '',
+      mobile: customer.mobile || '',
+      email: customer.email || '',
+      businessName: customer.businessName || '',
+      gstNumber: customer.gstNumber || '',
+      customerType: customer.customerType || 'RETAIL',
+      address: customer.address || '',
+      status: customer.status || 'LEAD',
+      followUpDate: customer.followUpDate
+        ? new Date(customer.followUpDate).toISOString().split('T')[0]
+        : '',
+    });
+  };
+
+  const handleUpdateCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomer) return;
+    setFormError('');
+    try {
+      const res = await apiClient.put(`/customers/${editingCustomer.id}`, editFormData);
+      if (res.data.success) {
+        setEditingCustomer(null);
+        clientCache.invalidate('/customers');
+        fetchCustomers();
+      }
+    } catch (err: any) {
+      setFormError(err.response?.data?.error?.message || 'Failed to update customer');
+    }
+  };
+
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCustomer || !newNote.trim()) return;
@@ -119,6 +169,10 @@ export function useCustomers() {
     }
   };
 
+  const handleCreateSalesOrder = (customer: Customer) => {
+    navigate(`/challans?customerId=${customer.id}`);
+  };
+
   const canEdit = user?.role === 'ADMIN' || user?.role === 'SALES';
 
   return {
@@ -134,6 +188,10 @@ export function useCustomers() {
     setIsAddModalOpen,
     selectedCustomer,
     setSelectedCustomer,
+    editingCustomer,
+    setEditingCustomer,
+    editFormData,
+    setEditFormData,
     newNote,
     setNewNote,
     formData,
@@ -141,7 +199,10 @@ export function useCustomers() {
     formError,
     canEdit,
     handleCreateCustomer,
+    openEditModal,
+    handleUpdateCustomer,
     handleAddNote,
     openCustomerDetail,
+    handleCreateSalesOrder,
   };
 }

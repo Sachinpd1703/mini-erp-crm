@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SalesChallan, Customer, Product, ChallanStatus } from '../../../types';
 import { apiClient } from '../../../services/api';
 import { clientCache, getCachedData } from '../../../services/apiCache';
@@ -6,6 +7,7 @@ import { useAuth } from '../../auth/AuthContext';
 
 export function useChallans() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [challans, setChallans] = useState<SalesChallan[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
@@ -50,6 +52,17 @@ export function useChallans() {
   useEffect(() => {
     fetchChallans();
   }, [statusFilter]);
+
+  // Check if customerId query param is present on mount
+  useEffect(() => {
+    const custId = searchParams.get('customerId');
+    if (custId) {
+      setSelectedCustomerId(custId);
+      openCreateWizard();
+      searchParams.delete('customerId');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams]);
 
   const openCreateWizard = async () => {
     setIsCreateModalOpen(true);

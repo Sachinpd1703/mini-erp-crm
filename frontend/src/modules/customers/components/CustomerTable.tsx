@@ -2,18 +2,27 @@ import React from 'react';
 import { Customer } from '../../../types';
 import { Badge } from '../../../components/ui/Badge';
 import { TableSkeleton } from '../../../components/ui/Skeleton';
-import { Mail, Phone, ChevronRight } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
+import { CustomerActionsMenu } from './CustomerActionsMenu';
 
 interface CustomerTableProps {
   customers: Customer[];
   loading: boolean;
-  onViewDetail: (id: string) => void;
+  canEdit: boolean;
+  onViewDetail: (customer: Customer) => void;
+  onEditCustomer: (customer: Customer) => void;
+  onAddNote: (customer: Customer) => void;
+  onCreateSalesOrder?: (customer: Customer) => void;
 }
 
 export const CustomerTable: React.FC<CustomerTableProps> = ({
   customers,
   loading,
+  canEdit,
   onViewDetail,
+  onEditCustomer,
+  onAddNote,
+  onCreateSalesOrder,
 }) => {
   if (loading) {
     return <TableSkeleton rows={5} cols={6} />;
@@ -30,7 +39,7 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
               <th className="py-3 px-4">Type</th>
               <th className="py-3 px-4">Status</th>
               <th className="py-3 px-4">Next Follow-Up</th>
-              <th className="py-3 px-4 text-right">Action</th>
+              <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F3CEA6]/50 dark:divide-slate-800/50">
@@ -80,13 +89,14 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
                       : 'Not scheduled'}
                   </td>
                   <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={() => onViewDetail(cust.id)}
-                      className="px-3 py-1.5 bg-[#FFFBF7] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 text-[#004D34] dark:text-sky-400 font-bold border border-[#F3CEA6] dark:border-slate-700 rounded-lg transition inline-flex items-center space-x-1 text-xs"
-                    >
-                      <span>View Profile</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                    <CustomerActionsMenu
+                      customer={cust}
+                      canEdit={canEdit}
+                      onViewProfile={onViewDetail}
+                      onEditCustomer={onEditCustomer}
+                      onAddNote={onAddNote}
+                      onCreateSalesOrder={onCreateSalesOrder}
+                    />
                   </td>
                 </tr>
               ))

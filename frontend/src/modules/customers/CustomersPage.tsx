@@ -4,6 +4,7 @@ import { useCustomers } from './hooks/useCustomers';
 import { CustomerFilterBar } from './components/CustomerFilterBar';
 import { CustomerTable } from './components/CustomerTable';
 import { AddCustomerModal } from './components/AddCustomerModal';
+import { EditCustomerModal } from './components/EditCustomerModal';
 import { CustomerDetailDrawer } from './components/CustomerDetailDrawer';
 
 export const CustomersPage: React.FC = () => {
@@ -20,6 +21,10 @@ export const CustomersPage: React.FC = () => {
     setIsAddModalOpen,
     selectedCustomer,
     setSelectedCustomer,
+    editingCustomer,
+    setEditingCustomer,
+    editFormData,
+    setEditFormData,
     newNote,
     setNewNote,
     formData,
@@ -27,8 +32,11 @@ export const CustomersPage: React.FC = () => {
     formError,
     canEdit,
     handleCreateCustomer,
+    openEditModal,
+    handleUpdateCustomer,
     handleAddNote,
     openCustomerDetail,
+    handleCreateSalesOrder,
   } = useCustomers();
 
   return (
@@ -65,7 +73,11 @@ export const CustomersPage: React.FC = () => {
       <CustomerTable
         customers={customers}
         loading={loading}
-        onViewDetail={openCustomerDetail}
+        canEdit={canEdit}
+        onViewDetail={(c) => openCustomerDetail(c.id)}
+        onEditCustomer={openEditModal}
+        onAddNote={(c) => openCustomerDetail(c.id)}
+        onCreateSalesOrder={handleCreateSalesOrder}
       />
 
       {/* Detail Drawer */}
@@ -85,6 +97,16 @@ export const CustomersPage: React.FC = () => {
         onSubmit={handleCreateCustomer}
         formData={formData}
         setFormData={setFormData}
+        formError={formError}
+      />
+
+      {/* Edit Customer Modal */}
+      <EditCustomerModal
+        customer={editingCustomer}
+        onClose={() => setEditingCustomer(null)}
+        onSubmit={handleUpdateCustomer}
+        editFormData={editFormData}
+        setEditFormData={setEditFormData}
         formError={formError}
       />
     </div>
