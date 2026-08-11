@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Customer, SalesChallan } from '../../types';
 import { apiClient } from '../../services/api';
 import { clientCache, getCachedData } from '../../services/apiCache';
+import { exportCustomerStatementToExcel } from '../../utils/exportExcel';
 import { Badge } from '../../components/ui/Badge';
 import { CardSkeleton, TableSkeleton } from '../../components/ui/Skeleton';
 import { EditCustomerModal } from './components/EditCustomerModal';
@@ -236,25 +237,36 @@ export const CustomerDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {canEdit && (
-          <div className="flex items-center space-x-2 self-start sm:self-auto">
-            <button
-              onClick={openEditModal}
-              className="px-3.5 py-2 bg-[#FFE4C4] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 border border-[#F3CEA6] dark:border-slate-700 text-[#002A1C] dark:text-slate-300 text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-sm"
-            >
-              <Edit3 size={14} className="text-amber-700 dark:text-amber-400" />
-              <span>Edit Profile</span>
-            </button>
+        <div className="flex items-center space-x-2 self-start sm:self-auto">
+          <button
+            onClick={() => exportCustomerStatementToExcel(customer)}
+            className="px-3.5 py-2 bg-[#FFE4C4] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 border border-[#F3CEA6] dark:border-slate-700 text-[#002A1C] dark:text-slate-300 text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-sm"
+            title="Export full financial ledger statement to Excel"
+          >
+            <Download size={14} className="text-[#004D34] dark:text-sky-400" />
+            <span>Export Statement (.xlsx)</span>
+          </button>
 
-            <button
-              onClick={() => navigate(`/challans?customerId=${customer.id}`)}
-              className="px-4 py-2 bg-[#004D34] hover:bg-[#003826] dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-md"
-            >
-              <ShoppingBag size={14} />
-              <span>Create Sales Order</span>
-            </button>
-          </div>
-        )}
+          {canEdit && (
+            <>
+              <button
+                onClick={openEditModal}
+                className="px-3.5 py-2 bg-[#FFE4C4] dark:bg-slate-800 hover:bg-[#FDD8A8] dark:hover:bg-slate-700 border border-[#F3CEA6] dark:border-slate-700 text-[#002A1C] dark:text-slate-300 text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-sm"
+              >
+                <Edit3 size={14} className="text-amber-700 dark:text-amber-400" />
+                <span>Edit Profile</span>
+              </button>
+
+              <button
+                onClick={() => navigate(`/challans?customerId=${customer.id}`)}
+                className="px-4 py-2 bg-[#004D34] hover:bg-[#003826] dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-md"
+              >
+                <ShoppingBag size={14} />
+                <span>Create Sales Order</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* TOP SECTION: Business Contact Profile Card */}
