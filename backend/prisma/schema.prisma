@@ -1,0 +1,155 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+enum ChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         Role     @default(SALES)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customerNotes  CustomerNote[]
+  stockMovements StockMovement[]
+  salesChallans  SalesChallan[]
+
+  @@map("users")
+}
+
+model Customer {
+  id           String         @id @default(uuid())
+  name         String
+  mobile       String
+  email        String         @unique
+  businessName String
+  gstNumber    String?
+  customerType CustomerType   @default(RETAIL)
+  address      String
+  status       CustomerStatus @default(LEAD)
+  followUpDate DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  notes         CustomerNote[]
+  salesChallans SalesChallan[]
+
+  @@map("customers")
+}
+
+model CustomerNote {
+  id         String   @id @default(uuid())
+  customerId String
+  createdBy  String
+  note       String   @db.Text
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [createdBy], references: [id])
+
+  @@map("customer_notes")
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  name          String
+  sku           String   @unique
+  category      String
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  currentStock  Int      @default(0)
+  minStockAlert Int      @default(5)
+  location      String?
+  imageUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  stockMovements StockMovement[]
+  challanItems   ChallanItem[]
+
+  @@map("products")
+}
+
+model StockMovement {
+  id           String       @id @default(uuid())
+  productId    String
+  quantity     Int
+  movementType MovementType
+  reason       String
+  createdBy    String
+  createdAt    DateTime     @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  author  User    @relation(fields: [createdBy], references: [id])
+
+  @@map("stock_movements")
+}
+
+model SalesChallan {
+  id            String        @id @default(uuid())
+  challanNumber String        @unique
+  customerId    String
+  status        ChallanStatus @default(DRAFT)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  totalQuantity Int
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  customer Customer      @relation(fields: [customerId], references: [id])
+  author   User          @relation(fields: [createdBy], references: [id])
+  items    ChallanItem[]
+
+  @@map("sales_challans")
+}
+
+model ChallanItem {
+  id                  String       @id @default(uuid())
+  salesChallanId      String
+  productId           String
+  snapshotProductName String
+  snapshotSku         String
+  snapshotUnitPrice   Decimal      @db.Decimal(10, 2)
+  quantity            Int
+  lineTotal           Decimal      @db.Decimal(10, 2)
+
+  salesChallan SalesChallan @relation(fields: [salesChallanId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id])
+
+  @@map("challan_items")
+}

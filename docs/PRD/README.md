@@ -18,6 +18,7 @@ This directory contains modular, exhaustive specification documents covering eve
 | [**06-api-specification-prd.md**](./06-api-specification-prd.md) | **REST API Specification** | Complete endpoint routing table, HTTP status codes, request/response JSON shapes |
 | [**07-frontend-prd.md**](./07-frontend-prd.md) | **Frontend Application PRD** | UI/UX visual standards, component design system, layout views, navigation flow |
 | [**08-delivery-and-documentation-prd.md**](./08-delivery-and-documentation-prd.md) | **Delivery & QA Requirements** | Local setup instructions, seed data execution, testing matrix, submission checklist |
+| [**DEVELOPMENT_PLAN.md**](../DEVELOPMENT_PLAN.md) | **Development Implementation Plan** | Phase-by-phase roadmap, execution checklists, milestone Gantt chart |
 
 ---
 
