@@ -16,8 +16,16 @@ import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
 
-// Middlewares
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+// Dynamic CORS Middleware supporting credentials
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow any requesting origin dynamically to satisfy browser CORS & credentials rules
+      callback(null, true);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,13 +44,24 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// Mount Modular API v1 Routes
+// Mount Modular API Routes (Both /api/v1/ and root prefixes for compatibility)
 app.use('/api/v1/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/v1/customers', customerRoutes);
+app.use('/customers', customerRoutes);
+
 app.use('/api/v1/products', productRoutes);
+app.use('/products', productRoutes);
+
 app.use('/api/v1/inventory', inventoryRoutes);
+app.use('/inventory', inventoryRoutes);
+
 app.use('/api/v1/challans', challanRoutes);
+app.use('/challans', challanRoutes);
+
 app.use('/api/v1/users', userRoutes);
+app.use('/users', userRoutes);
 
 // 404 Handler for undefined routes
 app.use((_req: Request, res: Response) => {
