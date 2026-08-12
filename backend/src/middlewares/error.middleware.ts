@@ -15,9 +15,10 @@ export const errorHandler = (
   }
 
   logger.error('Unhandled Application Exception:', err);
+  const detailMessage = err?.message || 'An unexpected error occurred on the server';
   return sendError(
     res,
-    'An unexpected error occurred on the server',
+    `Server Error: ${detailMessage}`,
     500,
     'INTERNAL_SERVER_ERROR'
   );
